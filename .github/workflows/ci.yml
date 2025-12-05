@@ -1,0 +1,32 @@
+name: CI
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  push:
+jobs:
+  Build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: 'temurin'
+          java-version: |
+            8
+            21
+      - uses: actions/checkout@v4
+        with:
+          repository: 'JetBrains/Kotlin'
+          path: 'kotlin'
+      - uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
+      - run: cd kotlin && ./gradlew install
+      - run: cd kotlin/libraries && JDK_18=${JAVA_HOME_8_X64} ./mvnw --no-transfer-progress install -pl '!:kotlin-maven-plugin-test'
+      - uses: actions/checkout@v4
+        with:
+          repository: 'Godin/jacoco'
+          ref: 'master'
+          path: 'jacoco'
+      - run: |
+          cd jacoco && ./mvnw -V -B -e --no-transfer-progress \
+            -Dkotlin.version=2.3.255-SNAPSHOT \
+            -Dkotlin.compiler.languageVersion=2.3 \
+            verify
