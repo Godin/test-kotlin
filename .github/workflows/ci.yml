@@ -27,6 +27,6 @@ jobs:
           path: 'jacoco'
       - run: |
           cd jacoco && ./mvnw -V -B -e --no-transfer-progress \
-            -Dkotlin.version=2.3.255-SNAPSHOT \
-            -Dkotlin.compiler.languageVersion=2.3 \
+            -Dkotlin.version=2.4.255-SNAPSHOT \
+            -Dkotlin.compiler.languageVersion=2.4 \
             verify
