@@ -3,6 +3,20 @@ on:
   schedule:
     - cron: '0 8 * * *'
   push:
+  workflow_dispatch:
+    inputs:
+      kotlin_repo:
+        required: true
+        default: 'JetBrains/Kotlin'
+      kotlin_ref:
+        required: true
+        default: 'master'
+      jacoco_repo:
+        required: true
+        default: 'jacoco/jacoco'
+      jacoco_ref:
+        required: true
+        default: 'master'
 jobs:
   Build:
     runs-on: ubuntu-24.04
@@ -15,15 +29,16 @@ jobs:
             21
       - uses: actions/checkout@v4
         with:
-          repository: 'JetBrains/Kotlin'
+          repository: ${{ inputs.kotlin_repo || 'JetBrains/Kotlin' }}
+          ref: ${{ inputs.kotlin_ref || 'master' }}
           path: 'kotlin'
       - uses: gradle/actions/setup-gradle@ac638b010cf58a27ee6c972d7336334ccaf61c96 # v4.4.1
       - run: cd kotlin && ./gradlew install
       - run: cd kotlin/libraries && JDK_17_0=${JAVA_HOME_17_X64} ./mvnw --no-transfer-progress install -pl '!:kotlin-maven-plugin-test'
       - uses: actions/checkout@v4
         with:
-          repository: 'Godin/jacoco'
-          ref: 'master'
+          repository: ${{ inputs.jacoco_repo || 'jacoco/jacoco' }}
+          ref: ${{ inputs.jacoco_ref || 'master' }}
           path: 'jacoco'
       - run: |
           cd jacoco && ./mvnw -V -B -e --no-transfer-progress \
